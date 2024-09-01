@@ -11,11 +11,31 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
+    <style>.header, .footer {
+        background-color: #343a40;
+        color: white;
+        padding: 20px 0;
+    }
+    .header h1, .footer p {
+        margin: 0;
+    }
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+    }
+    </style>
 </head>
 <body>
+<header class="header">
+    <div class="container">
+        <h1 class="text-center">E.com</h1>
+    </div>
+</header>
 <div class="container mt-5">
     <!-- Heading -->
-    <h1 class="text-center mb-4">E-Commerce App</h1>
+    <h1 class="text-center mb-4">Filter and select products </h1>
 
     <!-- Filter Options -->
     <div class="col-md-6">
@@ -66,7 +86,12 @@
         <div class="row justify-content-between align-items-center mb-4">
             <div class="col-md-3 text-start">
                 <!-- Go to Cart Button -->
-                <button id="goToCart" class="btn btn-success" >Go to Cart (<span id="cartCount">0</span>)</button>
+                <form action="cartServlet" method="post">
+                    <input type="hidden" name="action" value="goToCart">
+
+                    <button id="goToCart" class="btn btn-success" >Go to Cart (<span id="cartCount">0</span>)</button>
+                </form>
+
             </div>
         </div>
     </div>
@@ -147,6 +172,7 @@
             success: function(response) {
                 console.log(response)
                 $('#cartCount').text(response.cartCount); // Update cart item count
+                console.log(cartCount)
                 alert(productName + ' added to cart!');
             },
             error: function(xhr, status, error) {
@@ -155,15 +181,28 @@
             }
         });
     });
-    $(document).ready(function() {
-        $('#goToCart').click(function() {
-            window.location.href = 'cart.jsp'; // Go to Cart page
-        });
-    });
-
+    // $('#goToCart').click(function() {
+    //     $.ajax({
+    //         url: 'cartServlet', // Ensure this is the correct URL
+    //         type: 'POST',
+    //         data: {
+    //             "action": 'goToCart'
+    //         },
+    //         success: function(response) {
+    //             console.log('Redirecting to cart...');
+    //         },
+    //         error: function(xhr, status,  error) {
+    //             console.error('Error redirecting to cart: ' + error);
+    //         }
+    //     });
+    // });
 
 </script>
 
-
+<footer class="footer">
+    <div class="container">
+        <p>&copy; Made by PrasarRanjan. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>

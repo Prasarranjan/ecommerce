@@ -15,18 +15,14 @@ import java.util.Map;
 @WebServlet("/cartServlet")
 public class cartServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        doPost(request, response);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
     }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // Retrieve action parameter to check what the user wants to do
         String action = request.getParameter("action");
-
-        // Initialize the cart for the session if it doesn't exist
         HttpSession session = request.getSession();
         Map<Integer, CartItem> cart = (Map<Integer, CartItem>) session.getAttribute("cart");
         if (cart == null) {
@@ -35,30 +31,30 @@ public class cartServlet extends HttpServlet {
         }
 
         if ("addToCart".equals(action)) {
-            System.out.println("iam here");
-            // Get product data from request
             int productId = Integer.parseInt(request.getParameter("productId"));
             String productName = request.getParameter("productName");
             double productPrice = Double.parseDouble(request.getParameter("productPrice"));
 
-            // Add product to the cart or update quantity if already present
             CartItem item = cart.getOrDefault(productId, new CartItem(productId, productName, productPrice, 0));
             item.setQuantity(item.getQuantity() + 1); // Increment quantity
             cart.put(productId, item);
 
-            // Update cart in the session
             session.setAttribute("cart", cart);
 
-            // Return the updated cart size to the client
             response.setContentType("application/json");
             response.getWriter().write("{\"cartCount\": " + cart.size() + "}");
+        } else if ("goToCart".equals(action)) {
+            request.setAttribute("cart", cart);
+            request.setAttribute("grandTotal", calculateGrandTotal(cart));
+            request.getRequestDispatcher("cart.jsp").forward(request, response);
         }
-
-
-        session.setAttribute("cart", cart);
-        response.sendRedirect("cart.jsp");
-        // Other actions like "removeFromCart" or "clearCart" could be handled here
     }
 
-
+    private double calculateGrandTotal(Map<Integer, CartItem> cart) {
+        double grandTotal = 0.0;
+        for (CartItem item : cart.values()) {
+            grandTotal += item.getProductPrice() * item.getQuantity();
+        }
+        return grandTotal;
+    }
 }

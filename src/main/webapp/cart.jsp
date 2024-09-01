@@ -1,8 +1,23 @@
-<%@ page import="entity.Product" %>
-<%@ page import="java.util.List" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.Map" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<%@ page import="entity.CartItem" %>
 <!DOCTYPE html>
 <html lang="en">
+<style>.header, .footer {
+    background-color: #343a40;
+    color: white;
+    padding: 20px 0;
+}
+.header h1, .footer p {
+    margin: 0;
+} .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+  }
+</style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,62 +25,70 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+<header class="header">
+    <div class="container">
+        <h1 class="text-center">E.com</h1>
+    </div>
+</header>
 <div class="container mt-5">
-    <h1>Your Cart</h1>
+    <h1 class="text-center mb-4">Shopping Cart</h1>
 
     <%
-        // No need to redeclare 'session'; it's an implicit object in JSP
-        Object cartObj = session.getAttribute("cart");
-        List<Product> cart = null;
+        // Retrieve the cart and grandTotal attributes
+        Map<Integer, CartItem> cart = (Map<Integer, CartItem>) request.getAttribute("cart");
+        Double grandTotal = (Double) request.getAttribute("grandTotal");
 
-        // Check if the session attribute is not null and is of the correct type
-        if (cartObj != null && cartObj instanceof List) {
-            cart = (List<Product>) cartObj;
-        }
-
-        if (cart != null && !cart.isEmpty()) {
+        // Debugging output
+        System.out.println("Cart in JSP: " + cart);
+        System.out.println("Grand Total in JSP: " + grandTotal);
     %>
-    <table class="table table-bordered">
+
+    <% if (cart != null && !cart.isEmpty()) { %>
+    <table class="table">
         <thead>
         <tr>
             <th>Product Name</th>
             <th>Price</th>
-            <th>Action</th>
+            <th>Quantity</th>
+            <th>Total</th>
         </tr>
         </thead>
         <tbody>
-        <%
-            for (Product product : cart) {
-        %>
         <tr>
-            <td><%= product.getProductName() %></td>
-            <td>₹<%= product.getPrice() %></td>
-            <td>
-                <form method="post" action="cartServlet">
-                    <input type="hidden" name="productId" value="<%= product.getProductId() %>">
-                    <input type="hidden" name="action" value="remove">
-                    <button type="submit" class="btn btn-danger">Remove</button>
-                </form>
-            </td>
+
+        <% for (CartItem item : cart.values()) { %>
+            <%System.out.println(item); %>
+            <td><%= item.getProductName() %></td>
+            <td>₹<%= item.getProductPrice() %></td>
+            <td><%= item.getQuantity() %></td>
+            <td>₹<%= item.getProductPrice() * item.getQuantity() %></td>
         </tr>
-        <%
-            }
-        %>
+        <% } %>
+        <tr>
+            <td colspan="3" class="text-end"><strong>Grand Total:</strong></td>
+            <td>₹<%= grandTotal %></td>
+        </tr>
         </tbody>
     </table>
-    <div class="mt-4">
-        <a href="checkout.jsp" class="btn btn-success">Proceed to Checkout</a>
-    </div>
-    <%
-    } else {
-    %>
-    <p>Your cart is empty. <a href="index.jsp">Continue shopping</a></p>
-    <%
-        }
-    %>
-</div>
+    <% } else { %>
+    <p class="text-center">Your cart is empty.</p>
 
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <% }
+        System.out.println("nooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"); %>
+
+    <div class="text-center mt-4">
+        <div class="text-center mt-4">
+            <button class="btn btn-primary" onclick="window.open('invoice.jsp', '_blank', 'width=800,height=600')">Print Invoice</button>
+            <a href="downloadInvoice" class="btn btn-success">Download Invoice</a>
+        </div>
+
+        <a href=# class="btn btn-success mt-3">Proceed to Checkout</a>
+    </div>
+</div>
+<footer class="footer">
+    <div class="container">
+        <p>&copy; Made by PrasarRanjan. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>
