@@ -23,10 +23,11 @@ public class fetchdata extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/html");
+        resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
         String event = req.getParameter("event");
         if (event.equals("show")){
+
             int typeid=Integer.parseInt(req.getParameter("typeid"));
             jdbc ed= new jdbc();
             List<Product> ser=ed.show(typeid);

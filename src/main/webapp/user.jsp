@@ -1,4 +1,6 @@
+<%@ page import="entity.Product" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,6 +10,7 @@
     <title>E-Commerce App</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-5">
@@ -15,19 +18,17 @@
     <h1 class="text-center mb-4">E-Commerce App</h1>
 
     <!-- Filter Options -->
-    <!-- type Name first -->
     <div class="col-md-6">
         <div class="form-group">
-            <label for="typeName11">type Name</label>
+            <label for="typeName11">Type Name</label>
             <select id="typeName11" name="typeName11" class="form-control">
-                <%--                        <span id="typeError" style="color: red;"></span>--%>
                 <option value="">Select Type</option>
+                <%-- Fetch type names and IDs from database --%>
                 <%
                     // Database connection details
                     String jdbcURL = "jdbc:mysql://localhost:3306/ecom";
-
-                    String jdbcUsername = "root";  // change to your username
-                    String jdbcPassword = "prasar123";  // change to your password
+                    String jdbcUsername = "root";  // Change to your username
+                    String jdbcPassword = "prasar123";  // Change to your password
 
                     // Query to fetch type names and IDs
                     String sql = "SELECT typeid, typename FROM producttype";
@@ -37,17 +38,11 @@
                     ResultSet rs = null;
 
                     try {
-                        // Load the MySQL JDBC driver
                         Class.forName("com.mysql.cj.jdbc.Driver");
-
-                        // Establish connection to the database
                         conn = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
-
-                        // Execute query
                         stmt = conn.createStatement();
                         rs = stmt.executeQuery(sql);
 
-                        // Populate the dropdown with type names and bind the ID as value
                         while (rs.next()) {
                             int typeid = rs.getInt("typeid");
                             String typename = rs.getString("typename");
@@ -58,103 +53,117 @@
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
-                        // Close resources
                         if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
                         if (stmt != null) try { stmt.close(); } catch (SQLException ignore) {}
                         if (conn != null) try { conn.close(); } catch (SQLException ignore) {}
                     }
                 %>
             </select>
-            <!-- Hidden input to store the selected typeId -->
-            <input type="hidden" id="typeId" name="typeId">
         </div>
     </div>
-
+    <div class="container mt-5">
+        <!-- Heading and Cart Button -->
+        <div class="row justify-content-between align-items-center mb-4">
+            <div class="col-md-3 text-start">
+                <!-- Go to Cart Button -->
+                <button id="goToCart" class="btn btn-success" >Go to Cart (<span id="cartCount">0</span>)</button>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Product Cards -->
     <div class="row" id="productCards">
         <!-- Product cards will be inserted here by AJAX -->
+
     </div>
 </div>
 
 <!-- Bootstrap JS and Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-
-
-
-<!-- Bootstrap JS and Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 <!-- jQuery Script -->
-<!-- Include only the full version of jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 
 <script>
     $(document).ready(function() {
-        // Event triggered when dropdown changes
         $('#typeName11').change(function() {
-            var typeid = $(this).val();  // Get the selected value
+            var typeid = $(this).val();
             $.ajax({
                 url: 'servlet', // Servlet handling the request
-                type: 'POST',   // Using POST method
+                type: 'POST',
                 data: {
                     typeid: typeid,
                     event: "show"
-                }, // Data sent to server
-                dataType: 'JSON',
-
-                success: function(response) {
-                    // Clear existing products
-                    $('#productCards').empty();
-
-                    // Ensure response is in JSON format
-                    try {
-                        var products = JSON.parse(response); // Parse response if needed
-                    } catch (e) {
-                        var products = response; // Assume response is already JSON
-                    }
-
-                    // Iterate over the products and create cards dynamically
-                    $.each(products, function(index, product) {
-                       console.log(product)
-                        console.log($('#productCards')); // Should log the jQuery object of the element
-
-                        var p = `
-                           <div class="col-md-3 mb-4">
-                            <div class="card">
-                                <img src="${product.productImage}" class="card-img-top" alt="${product.productName}">
-                                <div class="card-body">
-                                    <h5 class="card-title">${product.productName}</h5>
-                                    <p class="card-text">$${product.price.toFixed(2)}</p>
-                                    <div class="mb-3">
-                                        <label for="quantity${product.productId}" class="form-label">Quantity</label>
-                                        <select class="form-select" id="quantity${product.productId}">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-                                    <a href="#" class="btn btn-primary">Add to Cart</a>
-                                </div>
-                            </div>
-                        </div>
-                        `;
-                        // Append the new card to the productCards container
-                        $('#productCards').append(p);
-                    });
                 },
+                dataType: 'json',
+                success: function(response) {
+                    var cardHtml = ""; // Initialize variable for card HTML
+
+                    // Assuming response is an array of product objects
+                    $.each(response, function(index, product) {
+                        cardHtml += "<div class='col-md-3 mb-4'>";
+                        cardHtml += "<div class='card'>";
+                        cardHtml += "<img src='image/" + product.productImage + "' class='card-img-top' alt='" + product.productName + "' height='200px' width='200px'>";
+                        cardHtml += "<div class='card-body'>";
+                        cardHtml += "<h5 class='card-title'>" + (product.productName || 'No Name') + " <span class='badge bg-secondary'>₹" + (product.price || '0.00') + "</span></h5>"; // Product name and price
+                        cardHtml += "<button class='btn btn-primary add-to-cart' data-id='" + product.productId + "' data-name='" + product.productName + "' data-price='" + product.price + "'>Add to Cart</button>";
+
+                        // Uncomment and fix if these properties are available
+                        // cardHtml += "<p class='card-text'>Email: " + (product.email || 'No Email') + "</p>";
+                        // cardHtml += "<p class='card-text'>Mobile: " + (product.mobile || 'No Mobile') + "</p>";
+                        // cardHtml += "<p class='card-text'>Club Name: " + (product.clubName || 'No Club Name') + "</p>";
+                        // cardHtml += "<p class='card-text'>Sports Name: " + (product.sportsName || 'No Sports Name') + "</p>";
+                        // cardHtml += "<p class='card-text'>Fees: $" + (product.fees || '0') + "</p>";
+                        cardHtml += "</div>";
+                        cardHtml += "</div>";
+                        cardHtml += "</div>";
+                    });
+
+                    $('#productCards').html(cardHtml); // Insert card HTML into container
+                },
+
                 error: function(xhr, status, error) {
-                    console.error("Error fetching products: " + error); // Log errors if they occur
+                    console.error("Error fetching products: " + error);
                 }
             });
         });
     });
+    //cart
+    $(document).on('click', '.add-to-cart', function() {
+        var productId = $(this).data('id'); // Use 'id' not 'productId'
+        var productName = $(this).data('name'); // Use 'name' not 'productName'
+        var productPrice = $(this).data('price');
+        console.log('Adding to cart:', { productId, productName, productPrice }); // Debugging line
+        $.ajax({
+            url: 'cartServlet',
+            type: 'POST',
+            data: {
+                productId: productId,
+                productName: productName,
+                productPrice: productPrice,
+                action: 'addToCart'
+            },
+            success: function(response) {
+                console.log(response)
+                $('#cartCount').text(response.cartCount); // Update cart item count
+                alert(productName + ' added to cart!');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding product to cart: ' + error);
+                alert("error")
+            }
+        });
+    });
+    $(document).ready(function() {
+        $('#goToCart').click(function() {
+            window.location.href = 'cart.jsp'; // Go to Cart page
+        });
+    });
+
+
 </script>
+
 
 </body>
 </html>
