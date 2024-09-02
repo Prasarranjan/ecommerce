@@ -10,13 +10,7 @@
         body {
             background-color: #f8f9fa;
         }
-        .hero {
-            background-image: url("path/to/your/image.jpg"); /* Replace with your image path */
-            background-size: cover;
-            background-position: center;
-            min-height: 60vh;
-            color: #fff;
-        }
+
         .header, .footer {
             background-color: #343a40;
             color: white;
@@ -67,10 +61,10 @@
         <h1 class="text-center text-white display-2">E.com</h1>
         <div class="row mt-5">
             <div class="col-md-6">
-                <a href="admin.jsp" class="btn btn-custom btn-admin">Admin</a>
+                <a href="admin.jsp" class="btn btn-custom btn-admin">SELL</a>
             </div>
             <div class="col-md-6">
-                <a href="user.jsp" class="btn btn-custom btn-user">User</a>
+                <a href="user.jsp" class="btn btn-custom btn-user">BUY</a>
             </div>
         </div>
     </div>

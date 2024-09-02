@@ -48,6 +48,7 @@ public class cartServlet extends HttpServlet {
             request.setAttribute("grandTotal", calculateGrandTotal(cart));
             request.getRequestDispatcher("cart.jsp").forward(request, response);
         }
+
     }
 
     private double calculateGrandTotal(Map<Integer, CartItem> cart) {
@@ -57,4 +58,5 @@ public class cartServlet extends HttpServlet {
         }
         return grandTotal;
     }
+
 }

@@ -199,10 +199,6 @@
 
 </script>
 
-<footer class="footer">
-    <div class="container">
-        <p>&copy; Made by PrasarRanjan. All rights reserved.</p>
-    </div>
-</footer>
+
 </body>
 </html>

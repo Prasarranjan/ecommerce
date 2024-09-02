@@ -24,16 +24,18 @@ public class jdbc {
 
         return Con;
     }
-    public static List<Product> show(int typeid){
+
+    public static List<Product> show(int typeid) {
         ArrayList<Product> list = new ArrayList<>();
-        Connection conn = getConnection();  {
+        Connection conn = getConnection();
+        {
             String sql = "SELECT name,image,price,typeid,productid FROM product WHERE typeid = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, typeid);
                 ResultSet rs = stmt.executeQuery();
 
                 while (rs.next()) {
-                    Product pd=new Product();
+                    Product pd = new Product();
                     pd.setProductName(rs.getString("name"));
                     pd.setProductImage(rs.getString("image"));
                     pd.setPrice(rs.getDouble("price"));
@@ -46,6 +48,26 @@ public class jdbc {
             }
         }
         return list;
-        }
     }
+
+    public static int saveDetails(Product u) {
+        int result = 0;
+        Connection con = getConnection();
+        try {
+            String createUser = "insert into product(name,image,typeid,price) values(?,?,?,?)";
+            PreparedStatement ps = con.prepareStatement(createUser);
+            ps.setString(1, u.getProductName());
+            ps.setString(2, u.getProductImage());
+            ps.setInt(3, u.getTypeId());
+            ps.setDouble(4, u.getPrice());
+            result = ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    }
+
 
